@@ -6,10 +6,11 @@ An OpusClip-style clipping studio that runs entirely on your own machine. You gi
 
 This is not a SaaS app and there's nothing to sign up for. Everything — video processing, transcription, the AI model, and your files — runs on the machine you install it on. There is no server to deploy this to; see [Requirements](#requirements) for why.
 
-- **Hardware:** a Mac with Apple Silicon (M1 or later). Transcription uses Apple's [MLX](https://github.com/ml-explore/mlx) framework, which only runs on Apple Silicon — this won't run on Intel Macs, Windows, or Linux as-is.
+- **Hardware:** a Mac with Apple Silicon (M1 or later) — **this is a hard requirement, not a current limitation that's planned to lift.** Transcription runs on [MLX](https://github.com/ml-explore/mlx), Apple's own machine-learning framework for its unified memory architecture; there is no MLX runtime for Windows or Linux, and the launcher scripts are `zsh`, which Windows doesn't have by default. Porting off MLX (e.g. to `faster-whisper`) and swapping the hardcoded macOS hardware video encoder for a cross-platform one would be a real code change, not a packaging fix.
 - **ffmpeg** installed and on your `PATH` (`brew install ffmpeg`) — every render, reframe, and caption burn-in shells out to it.
 - **[Ollama](https://ollama.com)** running locally with a model pulled (e.g. `ollama pull qwen3:8b`) for the AI picking/scoring/captioning — or an OpenAI-compatible cloud API key instead (see below).
 - **Python 3.12+** and [uv](https://docs.astral.sh/uv/).
+- **One instance per machine:** the web server always binds `127.0.0.1:8765` (not configurable yet), so you can't run two copies on the same Mac at once — starting a second one just fails to bind, it's not a broken install.
 
 ## Setup
 
