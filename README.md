@@ -1,14 +1,38 @@
 # Clipper
 
-An OpusClip-style clipping studio that runs entirely on your Mac. You give it a long video and a campaign brief, and it gives you ready-to-post short clips. Each clip comes with captions, a post caption that follows the brief's rules, an honest quality score, and an editor to change anything.
+An OpusClip-style clipping studio that runs entirely on your own machine. You give it a long video and a campaign brief, and it gives you ready-to-post short clips. Each clip comes with captions, a post caption that follows the brief's rules, an honest quality score, and an editor to change anything.
 
-## Start it
+## Runs locally only — there is no hosted version
+
+This is not a SaaS app and there's nothing to sign up for. Everything — video processing, transcription, the AI model, and your files — runs on the machine you install it on. There is no server to deploy this to; see [Requirements](#requirements) for why.
+
+- **Hardware:** a Mac with Apple Silicon (M1 or later). Transcription uses Apple's [MLX](https://github.com/ml-explore/mlx) framework, which only runs on Apple Silicon — this won't run on Intel Macs, Windows, or Linux as-is.
+- **ffmpeg** installed and on your `PATH` (`brew install ffmpeg`) — every render, reframe, and caption burn-in shells out to it.
+- **[Ollama](https://ollama.com)** running locally with a model pulled (e.g. `ollama pull qwen3:8b`) for the AI picking/scoring/captioning — or an OpenAI-compatible cloud API key instead (see below).
+- **Python 3.12+** and [uv](https://docs.astral.sh/uv/).
+
+## Setup
 
 ```bash
-~/clipper/clip-web
+git clone https://github.com/<you>/clipper.git
+cd clipper
+uv sync
+./clip-web
 ```
 
-Then open http://127.0.0.1:8765 (only this Mac can reach it).
+Then open http://127.0.0.1:8765 — it binds to localhost only, so nothing outside this machine can reach it.
+
+## API keys — how they're handled
+
+Clipper can run **fully offline** with a local Ollama model and never needs a key. Keys are only needed for optional features, and you enter them yourself in the app's **Settings** page, never in a config file you'd commit:
+
+| Key | What it's for | Required? |
+|---|---|---|
+| A cloud model key (`cloud_url` + `cloud_key`, OpenAI-compatible — Anthropic, OpenAI, Gemini, etc.) | Swap the local Ollama model for a hosted one | No — local Ollama works with no key at all |
+| [Pexels](https://www.pexels.com/api/) key | B-roll search | No — only if you enable B-roll |
+| Google OAuth client JSON | YouTube Shorts upload/scheduling | No — only if you use that feature |
+
+**Where keys live:** everything you enter in Settings is written to `settings.json` in the project root, which this repo's `.gitignore` already excludes, and the app `chmod`s that file to `600` (owner-read/write only) every time it's saved — see `clipper/settings.py`. Never commit `settings.json`, and never paste a real key into an issue, PR, or screenshot. If a key is ever exposed, revoke and regenerate it with that provider immediately.
 
 ## What it does
 
@@ -84,13 +108,13 @@ Then open http://127.0.0.1:8765 (only this Mac can reach it).
 **For agents:** REST API (docs at http://127.0.0.1:8765/docs), and an MCP server:
 
 ```bash
-claude mcp add clipper -- ~/clipper/clip-mcp
+claude mcp add clipper -- $(pwd)/clip-mcp
 ```
 
 ## Command line
 
 ```bash
-~/clipper/clip video.mp4 --rules brief.pdf --clips 3 --min 20 --max 40 --prompt "pricing talk" --aspect 9:16 --template karaoke
+./clip video.mp4 --rules brief.pdf --clips 3 --min 20 --max 40 --prompt "pricing talk" --aspect 9:16 --template karaoke
 ```
 
 ## Under the hood

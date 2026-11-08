@@ -1,10 +1,11 @@
 [project]
 name = "clipper"
 version = "0.1.0"
-description = "Add your description here"
+description = "A local, OpusClip-style AI video-clipping studio that runs entirely on your own Apple Silicon Mac."
 readme = "README.md"
+license = "MIT"
 authors = [
-    { name = "Abhijeet Singh", email = "abhijeetsh5002@gmail.com" }
+    { name = "Abhijeet Singh" }
 ]
 requires-python = ">=3.12"
 dependencies = [

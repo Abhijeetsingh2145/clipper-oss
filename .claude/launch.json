@@ -1,6 +1,0 @@
-{
-  "version": "0.0.1",
-  "configurations": [
-    {"name": "clipper-web", "runtimeExecutable": "/Users/abhijeetsh5002icloud.com/clipper/clip-web", "runtimeArgs": [], "port": 8765}
-  ]
-}
