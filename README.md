@@ -1,0 +1,110 @@
+# Clipper
+
+An OpusClip-style clipping studio that runs entirely on your Mac. You give it a long video and a campaign brief, and it gives you ready-to-post short clips. Each clip comes with captions, a post caption that follows the brief's rules, an honest quality score, and an editor to change anything.
+
+## Start it
+
+```bash
+~/clipper/clip-web
+```
+
+Then open http://127.0.0.1:8765 (only this Mac can reach it).
+
+## What it does
+
+**Clipping**
+- Picks highlights from the transcript for podcasts, interviews and vlogs, and from loudness, motion and cut density for trailers, gameplay, music and sports.
+- **AI Copilot:** tell it what to look for. **Topic search** finds where something is discussed, with a one-click clip.
+- **Reprompt:** get a new set of clips without re-transcribing.
+- **Timeframe:** clip only part of the video.
+- Clip count and length are up to you (presets, a custom range, or long clips of 2–15 minutes).
+- **Caption-only mode:** captions the whole video without clipping.
+
+**Score (clip quality estimate, not a view prediction)**
+- 7 measured parts, each with its evidence:
+  - Hook: when speech starts, loudness of the first 3 s, and question/number/"you" checked in the text, plus the model's judgment.
+  - Makes sense on its own: dangling openers, mid-sentence or setup endings, and the model's check.
+  - Payoff: the model's quote must appear in the clip's ending, combined with the ending's structure.
+  - Pacing: words per second, silence, longest pause.
+  - Visual energy: motion percentile, cuts per 10 s, face on screen.
+  - Audio dynamics: loudness variation.
+  - Campaign fit: the brief's focus, banned words, length.
+- Clips are ranked by the score.
+- **Calibration:** once you log 20+ posted clips in Analytics, the weights are refit to your real views per follower. Analytics shows how well the score ranked your clips before and after.
+
+**Reframing**
+- Layouts:
+  - Track: follows whoever's mouth is moving.
+  - Split screen: two people.
+  - Gameplay: game on top, facecam below.
+  - Screen share: screen plus speaker.
+  - Full frame on a blurred background, center crop, manual crop.
+  - **Auto:** picks a layout per camera shot.
+- Aspect ratios: 9:16, 1:1, 4:5, 16:9, or original.
+
+**Captions**
+- 7 templates: Bold Pop, Karaoke, Boxed, Minimal, Neon, One word, Subtitle.
+- AI keyword highlights (numbers always), colour emoji, colours per speaker.
+- Profanity censoring (asterisks plus a beep), with a custom word list.
+- Timing offset, custom font upload, per-word text fixes.
+
+**Audio**
+- Speech enhancement, RNNoise denoising, two-pass loudness to −14 LUFS.
+- Cut "um/uh", long pauses and repeated takes.
+- Background music that ducks under speech.
+- Sound effects: synthesized whoosh/pop/hit/riser plus your own.
+- AI voice-over: Kokoro, 54 voices, several languages; it can write the script from the clip.
+
+**Visuals and branding**
+- Zooms on key words, punch-ins on jump cuts, sharpening.
+- Logo (animated), image overlays, watermark, hook title, intro/outro.
+- B-roll from your library folder, plus Pexels with your free key; the source of every insert is recorded.
+- **Brand kits** save and reuse any of this.
+
+**Editor**
+- Player, a draggable timeline (trim, add sections, reorder), and a transcript (click to cut, highlight, add emoji, or fix text).
+- Panels for captions, framing, audio, visuals, post and score.
+- **AI Producer:** plain-English edits. The model can only choose from a fixed menu of edits, and every value is validated.
+- Targeted regeneration: new keywords, emoji, title, hook or B-roll.
+- Full version history with undo/redo and restore.
+- Shortcuts: Space, J/K/L, I/O, ⌘S, ⌘Z.
+
+**Campaign compliance**
+- Reads the brief from a Google Doc, PDF or pasted text, and extracts every rule: count, length, captions, `#Ad` disclosure first, hashtag limit, required tags and points, banned words, language.
+- Anything the brief bans (music, AI voices, outside footage, logos) is removed automatically with a warning.
+- Every clip gets a checklist. The rules it can't enforce are listed for you to check by hand.
+
+**Publishing and analytics**
+- Content calendar with due reminders.
+- YouTube Shorts upload and scheduling through your own Google OAuth client (setup steps are in Settings). TikTok and Instagram stay copy-and-post.
+- Performance log, results by campaign, YouTube stats sync, score calibration.
+
+**Import:** upload, a path on this Mac, or a link (YouTube, Drive, Twitch, X, Vimeo, Dropbox, direct file).
+
+**For agents:** REST API (docs at http://127.0.0.1:8765/docs), and an MCP server:
+
+```bash
+claude mcp add clipper -- ~/clipper/clip-mcp
+```
+
+## Command line
+
+```bash
+~/clipper/clip video.mp4 --rules brief.pdf --clips 3 --min 20 --max 40 --prompt "pricing talk" --aspect 9:16 --template karaoke
+```
+
+## Under the hood
+
+- Whisper large-v3-turbo (MLX) for transcription, then a one-time per-video analysis: scene cuts, motion, YuNet faces with mouth activity, loudness. It's cached in `cache/videos/`.
+- Qwen3 8B through Ollama, with structured output, for brief reading, picking, scoring judgments, captions and edits.
+- Every clip is an editable spec (`jobs/<id>/out/clip_NN.json` plus its `.versions/`).
+- One renderer turns a spec into an MP4: hardware decode, then a Python compositor, then VideoToolbox encode with libass captions.
+- Tests: `PYTHONPATH=. uv run pytest tests`
+
+## Honest limits
+
+- **Not built:** team workspaces, enterprise processing, AI-generated video B-roll and AI super-resolution (too heavy for 16 GB). "Sharpen" is an unsharp mask, not AI upscaling.
+- **TikTok/IG auto-posting:** needs those platforms to approve a developer app.
+- **Active-speaker tracking** uses mouth movement. It can be fooled by people chewing or by heavy compression; you can pin who to follow in the editor.
+- **Whisper** catches most "um"s but not all, and lyrics under loud music can be wrong.
+- **Scores** are estimates until calibrated on your own results.

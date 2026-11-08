@@ -1,0 +1,4 @@
+#!/bin/zsh
+# Start the Clipper web app at http://127.0.0.1:8765
+export PYTHONPATH="${0:A:h}${PYTHONPATH:+:$PYTHONPATH}"
+exec uv run --project "${0:A:h}" python -m clipper.web "$@"

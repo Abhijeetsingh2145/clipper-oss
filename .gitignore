@@ -1,0 +1,27 @@
+# Python-generated files
+__pycache__/
+*.py[oc]
+build/
+dist/
+wheels/
+*.egg-info
+
+# Virtual environments
+.venv
+
+# secrets
+settings.json
+
+# generated / user data
+.DS_Store
+*.log
+jobs/
+uploads/
+imports/
+campaigns/
+previews/
+cache/
+models/
+assets/
+analytics.json
+calendar.json

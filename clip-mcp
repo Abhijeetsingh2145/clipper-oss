@@ -1,0 +1,4 @@
+#!/bin/zsh
+# MCP server for AI agents (needs clip-web running). Register: claude mcp add clipper -- ~/clipper/clip-mcp
+export PYTHONPATH="${0:A:h}${PYTHONPATH:+:$PYTHONPATH}"
+exec uv run --project "${0:A:h}" python -m clipper.mcp_server "$@"
